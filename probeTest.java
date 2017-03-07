@@ -10,15 +10,15 @@ public class probeTest
   public static void main(String[] args) {
       //Connect to the arduino
       robot = new ArduinoUno();
-      int[] readings = new int[20];
-      robot.setPort("/dev/tty.usbmodem8");
+      int[] readings = new int[10];
+      robot.setPort("/dev/tty.usbmodem28");
       robot.connect();
       int sum = 0;
 
       //Get the average thermistor reading
       //PrintWriter writer = new PrintWriter("readings.txt");
     //  int thermistorReading = 0;
-      for(int i = 0; i < 20; i++){
+      for(int i = 0; i < 10; i++){
 
         //thermistorReading = getThermistorReading();
         readings[i] = getThermistorReading();
@@ -28,10 +28,10 @@ public class probeTest
       //  writer.println("The probe read the value: " + readings[i]);
       //  writer.println("In volts: " + (thermistorReading * (5.0/1023.0)));
         System.out.println("Trial number: "+ i);
-      //  System.out.println("The probe read the value: " + readings[i]);
-      //  System.out.println("In volts: " + (readings[i] * (5.0/1023.0)));
+        System.out.println("The probe read the value: " + readings[i]);
+        System.out.println("In volts: " + (readings[i] * (5.0/1023.0)));
       }
-      System.out.println(sum/20);
+      System.out.println(sum/10);
       System.out.println("");
       //writer.close();
       //Print the results

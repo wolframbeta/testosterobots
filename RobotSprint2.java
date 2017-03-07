@@ -19,48 +19,53 @@ public class RobotSprint2
   public static void main(String[] args) {
 
       //Creates a new instance of the robot class
-      RXTXRobot robot = new ArduinoNano();
+      RXTXRobot robot = new ArduinoUno();
       Scanner input = new Scanner(System.in);
       char cChoose;
 
       //Set port and connect the robot
-      robot.setPort("/dev/tty.usbmodem9");
+      robot.setPort("/dev/tty.usbmodem33");
       robot.connect();
 
       //Attach every motor needed
 
-      //Motor1 boom
+      //Motor 1 Car antenna
+      //robot.attachMotor(RXTXRobot.MOTOR1, 7);
+      //Motor2 right side
       robot.attachMotor(RXTXRobot.MOTOR1, 5);
-      //Motor2 left side
+      //Motor3 left side
       robot.attachMotor(RXTXRobot.MOTOR2, 6);
-      //Motot3 right side
-      robot.attachMotor(RXTXRobot.MOTOR3, 7);
 
+      //Attach servos
+      robot.attachServo(RXTXRobot.SERVO1, 9);
 
        //Cycle that iterates while a selection is diferent from 9
        do
-       {
+      {
            cChoose = displayMenu(input);
 
            switch (cChoose){
 
              case '1':
-                    //moveForward(robot);
+                      moveRobot(input,robot);
                       break;
              case '2':
-                    //moveServo(robot);
+                      moveServo(input,robot);
                       break;
              case '3':
-                    //readDistances(robot);
+                      readDistances(robot);
                       break;
              case '4':
-                    //moveInfinitely(robot);
+                      moveInfinitely(robot);
                       break;
              case '5':
-                      moveBoom(input, robot);
+                      //moveBoom(input, robot);
                       break;
              case '6':
                       getTemperature(robot);
+                      break;
+             case '7':
+                      System.out.println(robot.getConductivity());
                       break;
              case '9':
                       robot.close();
@@ -80,12 +85,13 @@ public class RobotSprint2
 
 		  char cChoice;
 		  System.out.print("\nWelcome to Sprint's 2 Robot Menu\n========================\nChoose from the following menu options:\n");
-		  System.out.println("1) Move 3 meters forward");
+		  System.out.println("1) Move robot");
 		  System.out.println("2) Move servo");
 		  System.out.println("3) Read distances");
 		  System.out.println("4) Move indefinitely");
       System.out.println("5) Move boom");
       System.out.println("6) Get temperature");
+      System.out.println("7) Get conductivity");
       System.out.println("9) Exit");
 		  System.out.print("Enter option:\n ");
 		  cChoice = input.next().charAt(0);
@@ -94,64 +100,24 @@ public class RobotSprint2
 
     }
 
-    //Moving the robot forward 3 meters
-    public static void moveForward(RXTXRobot r){
-
-      /*
-      Functions for moving the required motors until the robot is near 3 meters
-      //Has the motor's name and pin number connected.
-      //Attach as much as motors needed
-      robot.attachMotor(RXTXRobot.MOTOR1, 5);
-      //Function for moving THE MOTOR forward. First parameter is the name.
-      //Second, speed(I think top speed is 500, should play with this).
-      //Third, time motor will move in miniseconds, if 0 it will move indefinitely
-      //until another command is reached
-
-      robot.runMotor(RXTXRobot.MOTOR1, 255, 3300);
-
-
-      */
-    }
-
-    //Function for moving servo motors
-    public static void moveServo(){
-
-
-
-    }
-
-    public static void readDistances(){
-
-
-
-    }
-
-    public static void moveInfinitely(){
-
-
-    }
-    public static void moveBoom(Scanner scn, RXTXRobot r){
+    //Moving the robot forward or backwards 3 meters
+    public static void moveRobot(Scanner scn, RXTXRobot r){
 
       char cOption;
-      System.out.println("Is the boom up?\n Y/N:");
+      System.out.println("Move forward or backwards? \n F/B:");
       cOption = scn.next().charAt(0);
 
-      if(cOption == 'Y' || cOption == 'y'){
+      if(cOption == 'F' || cOption == 'f'){
 
-          System.out.println("Dropping boom...");
-          //Test which command elevates or drops it
-          //  robot.runMotor(RXTXRobot.MOTOR1, -255, 3500);
-          //  robot.runMotor(RXTXRobot.MOTOR1, 255, 3300);
-
+          System.out.println("Moving forward...");
+          r.runMotor(RXTXRobot.MOTOR1, 145, RXTXRobot.MOTOR2, 150, 23000); //150, 175
 
       }
 
-      else if (cOption == 'N' || cOption == 'n'){
+      else if (cOption == 'B' || cOption == 'b'){
 
-          System.out.println("Elevating boom... ");
-          //Test which command elevates or drops it
-          //  robot.runMotor(RXTXRobot.MOTOR1, -255, 3500);
-          //  robot.runMotor(RXTXRobot.MOTOR1, 255, 3300);
+          System.out.println("Moving backwards... ");
+          r.runMotor(RXTXRobot.MOTOR1, -150, RXTXRobot.MOTOR2, -145, 23000); //150, 175
 
       }
 
@@ -164,31 +130,118 @@ public class RobotSprint2
 
     }
 
+    //Method for moving servo motors
+    public static void moveServo(Scanner scn, RXTXRobot r){
+
+      int iOption = 0;
+
+      System.out.println("Enter desired angle:");
+      iOption = scn.nextInt();
+
+      System.out.printf("Moving servo %d degrees...", iOption);
+      r.moveServo(RXTXRobot.SERVO1, iOption);
+
+    }
+
+    //Method for reading ping sensor distances
+    public static void readDistances(RXTXRobot r){
+
+      for (int x=0; x < 5; ++x)
+        {
+          //Read the ping sensor value, which is connected to pin 12
+          //r.refreshDigitalPins();
+          System.out.println("Response: " + r.getPing(4) + " cm");
+          r.sleep(3000);
+        }
+
+    }
+
+    //Move the robot forward until the bump sensor is hitted
+    public static void moveInfinitely(RXTXRobot r){
+
+        boolean pressed = false;
+        int bump = 0;
+
+        r.refreshAnalogPins();
+        r.runMotor(RXTXRobot.MOTOR1, 150, RXTXRobot.MOTOR2, 160, 0); //150, 175
+
+        while ( !pressed ){
+          r.refreshAnalogPins();
+          bump = r.getAnalogPin(2).getValue();
+          System.out.println(bump);
+          r.sleep(10);
+          if(bump < 500)
+              pressed = true;
+
+          }
+          r.runMotor(RXTXRobot.MOTOR1, 0, RXTXRobot.MOTOR2, 0, 5);
+
+    }
+
+    //Method for raising or dropping the boom, not required for sprint 2
+    public static void moveBoom(Scanner scn, RXTXRobot r){
+
+      char cOption;
+      System.out.println("Is the boom up?\n Y/N:");
+      cOption = scn.next().charAt(0);
+
+      if(cOption == 'Y' || cOption == 'y'){
+
+          System.out.println("Dropping boom...");
+          //Test which command elevates or drops it
+            r.runMotor(RXTXRobot.MOTOR3, -180, 3500); //speed -255
+          //  robot.runMotor(RXTXRobot.MOTOR1, 255, 3300);
+
+
+      }
+
+      else if (cOption == 'N' || cOption == 'n'){
+
+          System.out.println("Elevating boom... ");
+          //Test which command elevates or drops it
+          //  robot.runMotor(RXTXRobot.MOTOR1, -255, 3500);
+            r.runMotor(RXTXRobot.MOTOR3, 255, 3300);
+
+      }
+
+      else {
+
+          System.out.print("Incorrect option, exiting Function");
+          return;
+
+      }
+
+    }
+
+    //Method for reading temperature, it returns a Celsius reading
     public static void getTemperature(RXTXRobot r){
 
       int[] readings = new int[5];
       int sum = 0;
-      double intercept = 747.63;
-      double slope = -7.42;
+      double intercept = 711.84;
+      double slope = -7.12;
       double temperature = 0.0;
+      int average = 0;
 
 
-      for(int i = 0; i < readings.length ; i++){
+      for(int i = 0; i < 5 ; i++){
 
         readings[i] = getThermistorReading(r);
         sum += readings[i];
 
       }
 
-      temperature = (sum/readings.length - intercept ) / slope;
+      average = sum / 5;
+      temperature = (average - intercept) / slope;
       System.out.printf("\nExterior temperature = %.2f C ", temperature);
 
     }
 
+    //Calling the thermistor reading method for having an ADC code for temperature
     public static int getThermistorReading(RXTXRobot r) {
 
       int sum = 0;
-      int readingCount = 10;
+      int readingCount = 5;
       //Read the analog pin values ten times, adding to sum each time
       for (int i = 0; i < readingCount; i++) {
          //Refresh the analog pins so we get new readings
@@ -201,33 +254,3 @@ public class RobotSprint2
   }
 
 }
-    //robot.attachMotor(RXTXRobot.MOTOR1, 5);
-    //  robot.runMotor(RXTXRobot.MOTOR1, -255, 3500);
-    //  robot.runMotor(RXTXRobot.MOTOR1, 255, 3300);
-      //robot.runMotor(RXTXRobot.MOTOR1, 0, 0);
-
-// Move servo to certain angle and back
-
-/*
-      robot.moveServo(RXTXRobot.SERVO1, 180); //Desired angle
-
-*/
-//Have sensors read 2 distances: one greater than 30cm and one less than 30 cm.
-/*RFID sensor
-      RFID irSensor = robot.get
-
-*/
-
-//Run motor indefinitely until stopped by a bump sensor.
-      /*
-      AnalogPin bumpPin = robot.getAnalogPin(Int pin number));
-
-      while (bumpPin.getValue == 0){
-
-        robot.runMotor(RXTXRobot.MOTOR1, 255, 0);
-
-      }
-      robot.runMotor(RXTXRobot.MOTOR1, 0, 0);
-
-
-      */
