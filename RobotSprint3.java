@@ -6,63 +6,76 @@ import java.util.Scanner;
 public class RobotSprint3
 {
 
-  private static final int DISTANCE = 25;
+  private static final int DISTANCE = 45;
 
   public static void main(String[] args) {
 
       //Creates a new instance of the robot class
       RXTXRobot robot = new ArduinoUno();
       int frontPing = 100;
-      int rightPing = 100;
-      int leftPing = 100;
+      int rightPing = 0;
+      int leftPing = 0;
       int leftGap = 100;
 
-      leftPing = leftGap;
+
       //Set port and connect the robot
-      robot.setPort("/dev/tty.usbmodem36");
+      robot.setPort("/dev/tty.usbmodem73");
       robot.connect();
 
-      //Motor 1 Car antenna
-      //robot.attachMotor(RXTXRobot.MOTOR3, 5);//should be on pin 7
+      //Motor 1 boom
+      robot.attachMotor(RXTXRobot.MOTOR3, 11);//should be on pin 7
       //Motor2 right side
-      //robot.attachMotor(RXTXRobot.MOTOR1, 5);
+      robot.attachMotor(RXTXRobot.MOTOR1, 6);
       //Motor3 left side
-      //robot.attachMotor(RXTXRobot.MOTOR2, 6);
+      robot.attachMotor(RXTXRobot.MOTOR2, 5);
 
       //Attach servos
-      //robot.attachServo(RXTXRobot.SERVO1, 9);
-      //robot.attachServo(RXTXRobot.SERVO2, 10);
+      robot.attachServo(RXTXRobot.SERVO1, 9); //right servo
+      robot.attachServo(RXTXRobot.SERVO2, 8); //left servo
 
-//Sprint 3 tasks step by step
-      moveForward(robot, frontPing);
-      turnDecision(robot, leftPing, rightPing);
-      while (leftPing <= 10 && rightPing <= 10){
-          moveForward(robot, frontPing);
-
-      }
-      if(frontPing && leftPing && rightPing ==)// wait until test to see the reading that we get on the top
-      {
-          raiseBoom();
-          getTemperature();
-          dropBoom();
-      }
       leftPing = leftSensor(robot);
 
-      while(leftPing == leftGap){
-          leftPing = leftSensor(robot);
-          moveForward(robot, frontPing);
+      pingForward(robot, frontPing);
+      turnRight(robot, 1725);
+      pingForward(robot, frontPing);
+
+      do{
+          frontPing = frontSensor(robot);
       }
-      turnDecision(robot, leftPing, rightPing);
-      moveForward(robot, frontPing);
-      turnDecision(robot, leftPing, rightPing);
-      moveForward(robot, frontPing);
-      turnDecision(robot, leftPing, rightPing);
+      while(frontPing <= DISTANCE);
+      robot.sleep(500);
+      climbRamp(robot);
+      //boom
+      turnLeft(robot, 1600);
+      raiseBoom(robot);
+      getTemperature(robot);
+      robot.sleep(1500);
+      dropBoom(robot);
+      moveForward(robot, 3500);
+
+      do{
+
+        leftPing = leftSensor(robot);
+        moveForward(robot, 1300);
+
+      } while( leftPing < 60 );
+
+      turnLeft(robot, 1725);
+      pingForward(robot, frontPing);
+      turnLeft(robot, 1725);
+      pingForward(robot, frontPing);
+      turnRight(robot, 1725);
+      pingForward(robot, frontPing);
+      turnRight(robot, 1725);
+      robot.close();
+
 
 
     }
 //!!!!!!!!!!!! Warning !!!!!!!!!!!!!!!
 //actual ArduinoUno connections need to be checked before using this method
 //Method for reading temperature, it returns a Celsius reading
+
     public static void getTemperature(RXTXRobot r){
 
       int[] readings = new int[3];
@@ -102,10 +115,9 @@ public class RobotSprint3
       return sum / readingCount;
   }
 
-//!!!!!!!!!!!! Warning !!!!!!!!!!!!!!!
-// The next to method are random declarations of where the car antenna is connected,
-//test is needed
+
 //Method for raising and dropping the boom
+
     public static void raiseBoom(RXTXRobot r){
 
         //Test which command elevates or drops it
@@ -120,33 +132,37 @@ public class RobotSprint3
 
     }
 
-//method for deciding which side should the robot turn
-//!!!!!!!!!!!! Warning !!!!!!!!!!!!!!!
-//This code is made with random motor declarations, speeds, and times
-//Test is needed to make this method work
-    public static void turnDecision(RXTXRobot r, int leftPing, int rightPing){
 
-        rightPing = rightSensor(r);
-        leftPing = leftSensor(r);
+    public static void stop(RXTXRobot r){
 
-        if (leftPing < rightPing)
-          r.runMotor(RXTXRobot.MOTOR1, 200, 2000);
-
-
-        else if(rightPing < leftPing)
-          r.runMotor(RXTXRobot.MOTOR2, 200, 2000);
+        r.runMotor(RXTXRobot.MOTOR1, 0, RXTXRobot.MOTOR2, 0, 0);
 
     }
+    public static void turnRight(RXTXRobot r, int time){
 
-    public static void moveForward(RXTXRobot r, int ping){
+        r.runMotor(RXTXRobot.MOTOR1, 210, RXTXRobot.MOTOR2, -240, time); //150, 175
 
-        int frontSensor = 100;
+    }
+    public static void turnLeft(RXTXRobot r, int time){
+
+        r.runMotor(RXTXRobot.MOTOR1, -240, RXTXRobot.MOTOR2, 210, time); //150, 175
+
+    }
+    public static void pingForward(RXTXRobot r, int ping){
+
+        //int frontSensor = 100;
+        r.runMotor(RXTXRobot.MOTOR1, 180, RXTXRobot.MOTOR2, 220, 0); //150, 175
         while (ping > DISTANCE ){
 
-            ping = frontSensor(r);
-            robot.runMotor(RXTXRobot.MOTOR1, 216, RXTXRobot.MOTOR2, 240, 115); //150, 175
+            //r.runMotor(RXTXRobot.MOTOR1, 230, RXTXRobot.MOTOR2, 240, 2000); //150, 175
+            ping = frontSensor(r);//r.getPing(4);
+            //r.sleep(200);
+            System.out.println("Distance:" + ping);
+            //System.out.println("Left Disctace:" + leftPing);
 
         }
+        r.runMotor(RXTXRobot.MOTOR1, 0, RXTXRobot.MOTOR2, 0, 0); //150, 175
+
 
     }
 
@@ -157,15 +173,17 @@ public class RobotSprint3
 
       int distance = 0;
       int readings = 0;
-      for (int x=0; x < 5; ++x){
+      for (int x=0; x < 3; ++x){
           //Read the ping sensor value, which is connected to pin 12
           //r.refreshDigitalPins();
           //System.out.println("Response: " + r.getPing(10) + " cm");//Right sensor 10, ffront 4
-          readings += r.getPing(10);
-          r.sleep(500);
+          readings += r.getPing(4);
+
+          r.sleep(100);
       }
 
-        distance = readings / 5;
+        distance = readings / 3;
+        System.out.println(distance);
         return distance;
 
     }
@@ -175,15 +193,15 @@ public class RobotSprint3
 
       int distance = 0;
       int readings = 0;
-      for (int x=0; x < 5; ++x){
+      for (int x=0; x < 3; ++x){
           //Read the ping sensor value, which is connected to pin 12
           //r.refreshDigitalPins();
           //System.out.println("Response: " + r.getPing(10) + " cm");//Right sensor 10, ffront 4
-          readings += r.getPing(11);
-          r.sleep(500);
+          readings += r.getPing(10);
+          r.sleep(100);
       }
 
-        distance = readings / 5;
+        distance = readings / 3;
         return distance;
 
     }
@@ -193,17 +211,28 @@ public class RobotSprint3
 
       int distance = 0;
       int readings = 0;
-      for (int x=0; x < 5; ++x){
+     for (int x=0; x < 3; ++x){
           //Read the ping sensor value, which is connected to pin 12
           //r.refreshDigitalPins();
           //System.out.println("Response: " + r.getPing(10) + " cm");//Right sensor 10, ffront 4
-          readings += r.getPing(12);
-          r.sleep(500);
+          readings += r.getPing(7);
+          r.sleep(100);
       }
 
-        distance = readings / 5;
+        distance = readings / 3;
         return distance;
 
     }
+    public static void climbRamp(RXTXRobot r){
+
+        r.runMotor(RXTXRobot.MOTOR1, 300, RXTXRobot.MOTOR2, 340, 5500); //150, 175
+
+    }
+    public static void moveForward(RXTXRobot r, int time){
+
+        r.runMotor(RXTXRobot.MOTOR1, 210, RXTXRobot.MOTOR2, 250, time); //150, 175
+
+    }
+
 
 }
