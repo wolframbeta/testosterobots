@@ -79,7 +79,7 @@ public class leftMethod
 
 
       moveForward(robot, 4000);
-      turnLeft(robot, 2150);
+      turnLeft(robot, 2250);
 
       pingForward(robot, frontPing);
       turnRight(robot, 1900);
@@ -364,7 +364,7 @@ public static void lastForward(RXTXRobot r){
     }
     public static void climbRamp(RXTXRobot r){
 
-        r.runMotor(RXTXRobot.MOTOR1, 360, RXTXRobot.MOTOR2, 410, 4000); //-35 //-35
+        r.runMotor(RXTXRobot.MOTOR1, 360, RXTXRobot.MOTOR2, 410, 3800); //-35 //-35
 
     }
     public static void climbSecondRamp(RXTXRobot r){
@@ -374,7 +374,7 @@ public static void lastForward(RXTXRobot r){
     }
     public static void moveForward(RXTXRobot r, int time){
 
-        r.runMotor(RXTXRobot.MOTOR1, 215, RXTXRobot.MOTOR2, 220, time); //-35
+        r.runMotor(RXTXRobot.MOTOR1, 215, RXTXRobot.MOTOR2, 270, time); //-35
 
     }
     public static void moveBackwards(RXTXRobot r, int time){
