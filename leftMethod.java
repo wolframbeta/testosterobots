@@ -4,7 +4,7 @@ import rxtxrobot.*;
 import java.util.Scanner;
 
 // Initialize RobotSpring2 class
-public class rightMethod
+public class leftMethod
 {
 
   private static final int DISTANCE = 55;
@@ -40,7 +40,8 @@ public class rightMethod
       //rightPing = rightSensor(robot);
 
       pingForward(robot, frontPing);
-      turnRight(robot, 1800);
+      turnRight(robot, 1600);//
+
       pingForward(robot, frontPing);
 
       do{
@@ -48,39 +49,51 @@ public class rightMethod
       }
       while(frontPing <= DISTANCE);
       robot.sleep(500);
+
       climbRamp(robot);
-      turnLeft(robot, 1600);
+      turnLeft(robot, 1740);
+
+      /*
       //boom
       tempADCode = getThermistorReading(robot);
-
+/*
       raiseBoom(robot);
       getTemperature(robot);
       getWindSpeed(robot, tempADCode);
       robot.sleep(1500);
       dropBoom(robot);
+*/
 
       //navigation
-      moveForward(robot, 2300);
+
+      moveForward(robot, 2600);
 
       do{
 
         leftPing = leftSensor(robot);
-        moveForward(robot, 600);
+        moveForward(robot, 800);
 
       } while( leftPing < 60 );
 
-      turnLeft(robot, 1825);
-      //pingForward(robot, frontPing);
+      turnLeft(robot, 1800);
+
+
       moveForward(robot, 4000);
-      turnLeft(robot, 1850);
+      turnLeft(robot, 2150);
+
       pingForward(robot, frontPing);
-      turnRight(robot, 1800);
-      //superTurnLeft(robot, 2000);
-      pingForward(robot, frontPing);//need a closer distance
-      turnRight(robot, 1800);
-      climbRamp(robot);
-      pingForward(robot, frontPing);
-      turnRight(robot, 1800);
+      turnRight(robot, 1900);
+
+      moveInfinitely(robot);//need a closer distance
+      moveBackwards(robot, 420);
+
+
+
+     turnRight(robot, 2100);
+
+      climbSecondRamp(robot);
+      pingRamp(robot, frontPing);
+      turnRight(robot, 1850);
       lastForward(robot);
 
       robot.close();
@@ -97,7 +110,7 @@ public static void lastForward(RXTXRobot r){
     int bump = 0;
 
     r.refreshAnalogPins();
-    r.runMotor(RXTXRobot.MOTOR1, 180, RXTXRobot.MOTOR2, 220, 0); //150, 175
+    r.runMotor(RXTXRobot.MOTOR1, 217, RXTXRobot.MOTOR2, 220, 0); //150, 175
 
     while ( !pressed ){
       r.refreshAnalogPins();
@@ -154,9 +167,9 @@ public static void lastForward(RXTXRobot r){
 
       average = sum / 3;
       average = average - adc;
-      speed = (average - intercept) / slope;
+      speed = (average - intercept) / slope - 63.61;
       //System.out.println(average);
-      System.out.printf("\nExterior windspeed = 2.52 m/s ");
+      System.out.printf("\nExterior windspeed = %.2f m/s ", speed);
 
 
     }
@@ -181,7 +194,7 @@ public static void lastForward(RXTXRobot r){
 
       average = sum / 3;
 
-      temperature = (average - intercept) / slope;
+      temperature = (average - intercept) / slope + 64;
 
       System.out.printf("\nExterior temperature = %.2f C ", temperature);
 
@@ -260,7 +273,24 @@ public static void lastForward(RXTXRobot r){
     public static void pingForward(RXTXRobot r, int ping){
 
         //int frontSensor = 100;
-        r.runMotor(RXTXRobot.MOTOR1, 180, RXTXRobot.MOTOR2, 185, 0); //150, 175 -35
+        r.runMotor(RXTXRobot.MOTOR1, 200, RXTXRobot.MOTOR2, 300, 0);//150, 175 -35
+        while (ping > DISTANCE ){
+
+            //r.runMotor(RXTXRobot.MOTOR1, 230, RXTXRobot.MOTOR2, 240, 2000); //150, 175
+            ping = frontSensor(r);//r.getPing(4);
+            //r.sleep(200);
+            System.out.println("Distance:" + ping);
+            //System.out.println("Left Disctace:" + leftPing);
+
+        }
+        r.runMotor(RXTXRobot.MOTOR1, 0, RXTXRobot.MOTOR2, 0, 0); //150, 175
+
+
+    }
+    public static void pingRamp(RXTXRobot r, int ping){
+
+        //int frontSensor = 100;
+        r.runMotor(RXTXRobot.MOTOR1, 180, RXTXRobot.MOTOR2, 180, 0); //150, 175 -35
         while (ping > DISTANCE ){
 
             //r.runMotor(RXTXRobot.MOTOR1, 230, RXTXRobot.MOTOR2, 240, 2000); //150, 175
@@ -334,7 +364,12 @@ public static void lastForward(RXTXRobot r){
     }
     public static void climbRamp(RXTXRobot r){
 
-        r.runMotor(RXTXRobot.MOTOR1, 300, RXTXRobot.MOTOR2, 335, 4700); //-35
+        r.runMotor(RXTXRobot.MOTOR1, 360, RXTXRobot.MOTOR2, 410, 4000); //-35 //-35
+
+    }
+    public static void climbSecondRamp(RXTXRobot r){
+
+        r.runMotor(RXTXRobot.MOTOR1, 360, RXTXRobot.MOTOR2, 340, 4800); //-35
 
     }
     public static void moveForward(RXTXRobot r, int time){
@@ -342,7 +377,31 @@ public static void lastForward(RXTXRobot r){
         r.runMotor(RXTXRobot.MOTOR1, 215, RXTXRobot.MOTOR2, 220, time); //-35
 
     }
+    public static void moveBackwards(RXTXRobot r, int time){
 
+        r.runMotor(RXTXRobot.MOTOR1, -215, RXTXRobot.MOTOR2, -220, time); //-35
+
+    }
+    public static void moveInfinitely(RXTXRobot r){
+
+        boolean pressed = false;
+        int bump = 0;
+
+        r.refreshAnalogPins();
+        r.runMotor(RXTXRobot.MOTOR1, 225, RXTXRobot.MOTOR2, 220, 0); //150, 175
+
+        while ( !pressed ){
+          r.refreshAnalogPins();
+          bump = r.getAnalogPin(2).getValue();
+          //System.out.println(bump);
+          r.sleep(10);
+          if(bump < 500)
+              pressed = true;
+
+          }
+          r.runMotor(RXTXRobot.MOTOR1, 0, RXTXRobot.MOTOR2, 0, 5);
+
+    }
 
 
 
